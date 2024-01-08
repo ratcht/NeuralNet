@@ -3,15 +3,26 @@ import types
 from functools import wraps
 from computation_graph import ComputationGraph, Node
 
-func_mapping = {
-  "add": _np.add,
-  "subtract": _np.subtract,
-  "multiply": _np.multiply,
-  "divide": _np.divide,
-  "sin": _np.sin,
-  "cos": _np.cos
-  }
 
+
+def getval(o):
+  return o.val if type(o) == Node else o
+
+def getdot(o):
+  return o.dot if type(o) == Node else 1
+
+def add_d(x, y):
+  print("add D: ", getdot(x), "   ", getdot(y))
+  return getdot(x) + getdot(y)
+
+def m_d(x, y):
+  print("m D: ", getdot(x), "   ", getdot(y))
+  return getval(x)*getdot(y) + getdot(x)*getval(y)
+
+derv_mapping = {
+  "add": add_d,
+  "multiply": m_d
+  }
 
 def primitive(f, cg: ComputationGraph, keep_grad=True): 
   @wraps(f)
@@ -23,8 +34,7 @@ def primitive(f, cg: ComputationGraph, keep_grad=True):
     ## Code to add operation/primitive to computation graph
     # We need to separate out the integer/non node case. Sometimes you are adding 
     # constants to nodes. 
-    def getval(o):
-      return o.val if type(o) == Node else o
+
     
     if len(args):
       argvals = [getval(o) for o in args]
@@ -40,9 +50,16 @@ def primitive(f, cg: ComputationGraph, keep_grad=True):
     parents = [o for o in l if type(o) == Node ]
     
     value = f(*argvals, **kwargvals)
+
+    dot = 0
+    df = None
+    if keep_grad:
+      df = derv_mapping[f.__name__]
+      dot = df(*argvals, **kwargvals)
+
     print("add", "'" + f.__name__ + "'", "to graph with value",value)
     
-    node = Node(value, f, parents, keep_grad)
+    node = Node(value, dot, f, df, parents, keep_grad)
 
     cg.add_to_graph(node)
 

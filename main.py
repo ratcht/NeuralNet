@@ -1,11 +1,7 @@
 from autograd_numpy import Numpy
 import numpy as _np
 import math
-from contextlib import contextmanager
-from typing import Callable
-
-from functools import wraps
-from computation_graph import ComputationGraph
+from computation_graph import ComputationGraph, Node
 
 
 # init numpy with a cg
@@ -27,12 +23,12 @@ def squared_loss(y, y_hat):
 
 
 
-
-def test(x, y):
-  z =  np.add(x,y) 
-  y = np.multiply(z, 5)
+def func1(x):
+  a1 = np.multiply(np.multiply(x, x),3)
+  a2 = np.multiply(x, 4)
+  a3 = 2
+  y = np.add(np.add(a1, a2),a3)
   return y
 
-m = test(5, 7)
-print("\n")
+y = func1(3)
 print(str(cg))

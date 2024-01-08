@@ -1,4 +1,4 @@
-import autograd_numpy as _np
+import numpy as _np
 import math
 from contextlib import contextmanager
 from typing import Callable
@@ -20,9 +20,11 @@ class TraceStack():
 
 
 class Node:
-  def __init__(self, val, fun, parents, keep_grad, *fun_args, **fun_kwargs):
+  def __init__(self, val, dot, fun, dfun, parents, keep_grad, *fun_args, **fun_kwargs):
     self.val = val
+    self.dot = dot
     self.fun = fun
+    self.dfun = dfun
     self.parents = parents
     self.trace_id = -1
     self.keep_grad = keep_grad
@@ -32,11 +34,11 @@ class Node:
     if self.val is None: 
       str_val = 'None'
     else: 
-      str_val = str(round(self.val,3))
+      str_val = str(self.val)
     
     parents_ids = [node.trace_id for node in self.parents]
 
-    repr = f"Node ID: {self.trace_id}\nFun: {str(self.fun)}\nValue: {str_val}\nParents: {str(parents_ids)}"
+    repr = f"Node ID: {self.trace_id}\nFun: {str(self.fun)}\nValue: {str_val}\nDot: {self.dot}\nParents: {str(parents_ids)}"
 
     return  repr
   
@@ -48,6 +50,7 @@ class Node:
     fun = lambda x: x
     parents = []
     return cls(value, fun, parents, keep_grad)
+
 
 class ComputationGraph:
   def __init__(self):
@@ -66,7 +69,4 @@ class ComputationGraph:
       repr += "\n\n"
     
     return repr
-
-
-
-
+  
