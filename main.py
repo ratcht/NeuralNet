@@ -1,4 +1,4 @@
-from autograd_numpy import Numpy
+from autodiff_numpy import Numpy
 import numpy as _np
 import math
 from computation_graph import ComputationGraph, Node

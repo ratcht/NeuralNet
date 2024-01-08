@@ -1,4 +1,4 @@
-from autograd_numpy import Numpy
+from autodiff_numpy import Numpy
 import numpy as _np
 from activation_funcs import activation_func_map
 
